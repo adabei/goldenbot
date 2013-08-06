@@ -2,7 +2,9 @@ package main
 
 import (
   "encoding/json"
+  "flag"
 	"io/ioutil"
+  "log"
   "os"
 	"strings"
 	"github.com/adabei/goldenbot/greeter"
@@ -20,27 +22,42 @@ type GoldenConfig struct {
 }
 
 func main() {
-  fi, _ := os.Open("golden.cfg")
-  b, _ := ioutil.ReadAll(fi)
+  // Parse command line flags
+  configPath := *flag.String("config", "golden.cfg", "the config file to use")
+  flag.Parse()
+
+  // Read config
+  fi, err := os.Open(configPath)
+  if err != nil {
+    log.Fatal("Couldn't open config file: ", err)
+  }
+
+  b, err := ioutil.ReadAll(fi)
+  if err != nil {
+    log.Fatal("Couldn't read config file: ", err)
+  }
+
   var cfg GoldenConfig
   json.Unmarshal(b, &cfg)
+
+  // Setup RCON connection
 	rch := make(chan rcon.RCONRequest, 10)
 	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
-	greetings := greeter.NewGreeter("Greetings! Welcome to the server, %s.", rch)
-
+	
+  // Setup plugins
+  greetings := greeter.NewGreeter("Greetings! Welcome to the server, %s.", rch)
 	votekick := votes.NewVote(rch)
   advert := advert.NewAdvert("ads.txt", 60000, rch)
-	chain := daisy(greetings, votekick, advert)
+	
+  chain := daisy(greetings, votekick, advert)
 	go rcon.Relay()
 
-	logch := make(chan string)
-	go tails.Tail(cfg.LogfilePath, logch, false)
+	logchan := make(chan string)
+	go tails.Tail(cfg.LogfilePath, logchan, false)
 	for {
 		line := <-logch
-		//remove go
-		func(ch chan string) { ch <- strings.TrimSpace(line) }(chain)
+    chain <- strings.TrimSpace(line)
 	}
-	os.Exit(0)
 }
 
 type Plugin interface {
