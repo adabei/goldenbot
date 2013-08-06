@@ -3,8 +3,8 @@ package greeter
 
 import (
 	"fmt"
-	"strings"
 	"github.com/adabei/goldenbot/rcon"
+	"strings"
 )
 
 type Greeter struct {
@@ -25,7 +25,7 @@ func (g *Greeter) Start(next, prev chan string) {
 		next <- in
 
 		values := strings.Split(in, " ")
-    if strings.HasPrefix(values[1], "J") {
+		if strings.HasPrefix(values[1], "J") {
 			res := make(chan string)
 			g.requests <- *rcon.NewRCONRequest("say \""+fmt.Sprintf(g.message, in)+"\"", res)
 		}

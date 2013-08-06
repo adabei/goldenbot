@@ -43,13 +43,13 @@ func (r *RCON) Relay() {
 
 		_, err = conn.Write(rconMessage(r.password, req.Command))
 		checkError(err)
-    if req.Response != nil {
-      var buf [65565]byte
-      conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-      n, err := conn.Read(buf[0:])
-      checkError(err)
-      req.Response <- string(buf[0:n])
-    }
+		if req.Response != nil {
+			var buf [65565]byte
+			conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			n, err := conn.Read(buf[0:])
+			checkError(err)
+			req.Response <- string(buf[0:n])
+		}
 	}
 
 }

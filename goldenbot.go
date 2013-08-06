@@ -1,62 +1,62 @@
 package main
 
 import (
-  "encoding/json"
-  "flag"
-	"io/ioutil"
-  "log"
-  "os"
-	"strings"
+	"encoding/json"
+	"flag"
+	"github.com/adabei/goldenbot/advert"
 	"github.com/adabei/goldenbot/greeter"
 	"github.com/adabei/goldenbot/rcon"
 	"github.com/adabei/goldenbot/tails"
 	"github.com/adabei/goldenbot/votes"
-	"github.com/adabei/goldenbot/advert"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
 )
 
 type GoldenConfig struct {
-  Address string
-  RCONPassword string
-  LogfilePath string
-  SayPrefix string
+	Address      string
+	RCONPassword string
+	LogfilePath  string
+	SayPrefix    string
 }
 
 func main() {
-  // Parse command line flags
-  configPath := *flag.String("config", "golden.cfg", "the config file to use")
-  flag.Parse()
+	// Parse command line flags
+	configPath := *flag.String("config", "golden.cfg", "the config file to use")
+	flag.Parse()
 
-  // Read config
-  fi, err := os.Open(configPath)
-  if err != nil {
-    log.Fatal("Couldn't open config file: ", err)
-  }
+	// Read config
+	fi, err := os.Open(configPath)
+	if err != nil {
+		log.Fatal("Couldn't open config file: ", err)
+	}
 
-  b, err := ioutil.ReadAll(fi)
-  if err != nil {
-    log.Fatal("Couldn't read config file: ", err)
-  }
+	b, err := ioutil.ReadAll(fi)
+	if err != nil {
+		log.Fatal("Couldn't read config file: ", err)
+	}
 
-  var cfg GoldenConfig
-  json.Unmarshal(b, &cfg)
+	var cfg GoldenConfig
+	json.Unmarshal(b, &cfg)
 
-  // Setup RCON connection
+	// Setup RCON connection
 	rch := make(chan rcon.RCONRequest, 10)
 	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
-	
-  // Setup plugins
-  greetings := greeter.NewGreeter("Greetings! Welcome to the server, %s.", rch)
+
+	// Setup plugins
+	greetings := greeter.NewGreeter("Greetings! Welcome to the server, %s.", rch)
 	votekick := votes.NewVote(rch)
-  advert := advert.NewAdvert("ads.txt", 60000, rch)
-	
-  chain := daisy(greetings, votekick, advert)
+	advert := advert.NewAdvert("ads.txt", 60000, rch)
+
+	chain := daisy(greetings, votekick, advert)
 	go rcon.Relay()
 
 	logchan := make(chan string)
 	go tails.Tail(cfg.LogfilePath, logchan, false)
 	for {
 		line := <-logch
-    chain <- strings.TrimSpace(line)
+		chain <- strings.TrimSpace(line)
 	}
 }
 

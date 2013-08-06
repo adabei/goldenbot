@@ -2,9 +2,9 @@ package votes
 
 import (
 	"fmt"
+	"github.com/adabei/goldenbot/rcon"
 	"strings"
 	"time"
-	"github.com/adabei/goldenbot/rcon"
 )
 
 type Vote struct {
