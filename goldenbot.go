@@ -8,6 +8,7 @@ import (
 	"github.com/adabei/goldenbot/rcon"
 	"github.com/adabei/goldenbot/tails"
 	"github.com/adabei/goldenbot/votes"
+  _ "github.com/adabei/goldenbot/commands"
 	"io/ioutil"
 	"log"
 	"os"
@@ -55,7 +56,7 @@ func main() {
 	logchan := make(chan string)
 	go tails.Tail(cfg.LogfilePath, logchan, false)
 	for {
-		line := <-logch
+		line := <-logchan
 		chain <- strings.TrimSpace(line)
 	}
 }
