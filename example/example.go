@@ -3,25 +3,27 @@ package example
 import (
   "fmt"
   "github.com/adabei/goldenbot/rcon"
+  "github.com/adabei/goldenbot/events"
+  "github.com/adabei/goldenbot/events/cod4"
 )
 
 type Example struct {
   requests chan rcon.RCONRequest
+  events chan interface{}
 }
 
-func NewExample(requests chan rcon.RCONRequest) *Example {
+func NewExample(requests chan rcon.RCONRequest, ea events.Aggregator) *Example {
   e := new(Example)
   e.requests = requests
+  e.events = ea.Subscribe(e)
   return e
 }
 
-func (e *Example) Start (next, prev chan string) {
+func (e *Example) Start () {
   for {
-    // Every plugin has to pass on messages to the next
-    in := <-prev
-    next <- in
+    in := <-e.events
 
-    // Here we will print all received messages to Stdout
+    // Print all received messages to Stdout
     fmt.Println(in)
   }
 }

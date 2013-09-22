@@ -3,16 +3,15 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/adabei/goldenbot/advert"
-	"github.com/adabei/goldenbot/greeter"
-	"github.com/adabei/goldenbot/rcon"
-	"github.com/adabei/goldenbot/tails"
-	"github.com/adabei/goldenbot/votes"
-  _ "github.com/adabei/goldenbot/commands"
 	"io/ioutil"
 	"log"
+  _ "strings"
 	"os"
-	"strings"
+	"github.com/adabei/goldenbot/rcon"
+	"github.com/adabei/goldenbot/tails"
+  "github.com/adabei/goldenbot/events"
+  "github.com/adabei/goldenbot/events/cod"
+	"github.com/adabei/goldenbot/greeter"
 )
 
 type GoldenConfig struct {
@@ -26,12 +25,37 @@ func main() {
 	// Parse command line flags
 	configPath := *flag.String("config", "golden.cfg", "the config file to use")
 	flag.Parse()
+  cfg := LoadConfig(configPath)
 
-	// Read config
-	fi, err := os.Open(configPath)
+  // Initialize EventAggregator
+  ea := events.NewAggregator()
+
+	// Setup RCON connection
+	rch := make(chan rcon.RCONRequest, 10)
+	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
+	go rcon.Relay()
+
+  // Plugins
+
+  greeter := greeter.NewGreeter("Welcome %s", rch, *ea)
+  go greeter.Start()
+
+	logchan := make(chan string)
+	go tails.Tail(cfg.LogfilePath, logchan, false)
+	for {
+		line := <-logchan
+    join := cod.Join {"GUIDDD123", 1, line}
+    ea.Publish(join)
+	}
+}
+
+func LoadConfig(path string) GoldenConfig {
+  // Read config
+	fi, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Couldn't open config file: ", err)
 	}
+  defer fi.Close()
 
 	b, err := ioutil.ReadAll(fi)
 	if err != nil {
@@ -40,44 +64,9 @@ func main() {
 
 	var cfg GoldenConfig
 	json.Unmarshal(b, &cfg)
-
-	// Setup RCON connection
-	rch := make(chan rcon.RCONRequest, 10)
-	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
-
-	// Setup plugins
-	greetings := greeter.NewGreeter("Greetings! Welcome to the server, %s.", rch)
-	votekick := votes.NewVote(rch)
-	advert := advert.NewAdvert("ads.txt", 60000, rch)
-
-	chain := daisy(greetings, votekick, advert)
-	go rcon.Relay()
-
-	logchan := make(chan string)
-	go tails.Tail(cfg.LogfilePath, logchan, false)
-	for {
-		line := <-logchan
-		chain <- strings.TrimSpace(line)
-	}
+  return cfg
 }
 
 type Plugin interface {
-	Start(prev, next chan string)
-}
-
-// Daisy sets up the daisy chain of plugins for message passing.
-// Returns a channel on which we can send in messages.
-func daisy(plugins ...Plugin) chan string {
-	last := make(chan string)
-	prev := last
-	next := last
-
-	for _, p := range plugins {
-		prev = make(chan string)
-		go p.Start(next, prev)
-		next = prev
-	}
-	// drain the last channel in the chain
-	go func(ch chan string) { <-last }(last)
-	return prev
+	Start()
 }

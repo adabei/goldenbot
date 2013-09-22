@@ -2,14 +2,17 @@ package perfrep
 
 import (
 	"fmt"
-	"github.com/adabei/goldenbot/rcon"
 	"strings"
+	"github.com/adabei/goldenbot/rcon"
+  "github.com/adabei/goldenbot/events"
+  "github.com/adabei/goldenbot/events/cod4"
 )
 
 type PerfRep struct {
 	Show     bool
 	requests chan rcon.RCONRequest
 	Stats    map[string]Stats
+  events   chan interface{}
 }
 
 type Stats struct {
@@ -18,17 +21,17 @@ type Stats struct {
 	Assists int
 }
 
-func NewPerfRep(show bool, requests chan rcon.RCONRequests) *MVP {
+func NewPerfRep(show bool, requests chan rcon.RCONRequests, ea events.Aggregator) *MVP {
 	p := new(PerfRep)
 	p.Show = show
 	p.requests = requests
+  p.events = ea.Subscribe(p)
 	return p
 }
 
-func (p *PerfRep) Start(next, prev chan string) {
+func (p *PerfRep) Start() {
 	for {
-		in := <-prev
-		next <- in
+		in := <-p.events
 	}
 }
 

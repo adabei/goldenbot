@@ -24,12 +24,8 @@ func NewAdvert(input string, interval int, requests chan rcon.RCONRequest) *Adve
 	return a
 }
 
-func (a *Advert) Start(next, prev chan string) {
+func (a *Advert) Start() {
 	go a.Advertise()
-	for {
-		in := <-prev
-		next <- in
-	}
 }
 
 func (a *Advert) Advertise() {
