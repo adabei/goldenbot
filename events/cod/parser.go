@@ -3,12 +3,13 @@ package cod
 import (
 	"strconv"
 	"strings"
+	"log"
 )
 
 func Parse(line string) interface{} {
 
 	//todo global, todo more
-	indices := map[string]int{"say": 5, "sayteam": 5, "tell": 8}
+	indices := map[string]int{"say": 4, "sayteam": 4, "tell": 7}
 
 	offset := 0
 	if line[:1] == " " {
@@ -18,7 +19,6 @@ func Parse(line string) interface{} {
 	}
 
 	values := strings.Split(line[offset:], ";")
-
 	switch values[0] {
 	case "J":
 		ret := Join{}
@@ -31,6 +31,7 @@ func Parse(line string) interface{} {
 		ret.GUID = values[1]
 		ret.Num, _ = strconv.Atoi(values[2])
 		ret.Name = values[3]
+		return ret
 	case "say":
 		ret := Say{}
 		ret.GUID = values[1]
@@ -54,8 +55,9 @@ func Parse(line string) interface{} {
 		ret.NumB, _ = strconv.Atoi(values[5])
 		ret.NameB = values[6]
 		ret.Message = strings.Join(values[indices["tell"]:], "")
+		return ret
 	case "D":
-		if values[6] == "-1" {
+		if values[6] != "-1" {
 			ret := Damage{}
 			ret.GUIDA = values[1]
 			ret.NumA, _ = strconv.Atoi(values[2])
@@ -85,14 +87,15 @@ func Parse(line string) interface{} {
 		ret.GUIDA = values[1]
 		ret.NumA, _ = strconv.Atoi(values[2])
 		ret.TeamA = values[3]
-		ret.GUIDB = values[4]
-		ret.NumB, _ = strconv.Atoi(values[5])
-		ret.TeamB = values[6]
-		ret.NameB = values[7]
-		ret.Weapon = values[8]
-		ret.DamageDealt, _ = strconv.Atoi(values[9])
-		ret.MOD = values[10]
-		ret.Target = values[11]
+		ret.NameA = values[4]
+		ret.GUIDB = values[5]
+		ret.NumB, _ = strconv.Atoi(values[6])
+		ret.TeamB = values[7]
+		ret.NameB = values[8]
+		ret.Weapon = values[9]
+		ret.DamageDealt, _ = strconv.Atoi(values[10])
+		ret.MOD = values[11]
+		ret.Target = values[12]
 		return ret
 	case "Weapon":
 		ret := Weapon{}
@@ -100,16 +103,19 @@ func Parse(line string) interface{} {
 		ret.Num, _ = strconv.Atoi(values[2])
 		ret.Name = values[3]
 		ret.Pickup = values[4]
-  case "A":
-    ret := Action{}
-    ret.GUID = values[1]
-    ret.Num, _ = strconv.Atoi(values[2])
-    ret.Name = values[3]
-    ret.Action = values[4]
+		return ret
+	case "A":
+		ret := Action{}
+		ret.GUID = values[1]
+		ret.Num, _ = strconv.Atoi(values[2])
+		ret.Name = values[3]
+		ret.Action = values[4]
+		return ret
 	default:
+		// TODO Info level
+		log.Println("Could not parse line: ", line)
 		return nil
 	}
-	return nil
 }
 
 type InitGame struct {

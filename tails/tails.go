@@ -4,6 +4,7 @@ package tails
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"time"
 )
@@ -27,6 +28,7 @@ func Tail(path string, ch chan string, log bool) {
 		}
 
 		fi, _ := os.Open(path)
+		defer fi.Close()
 
 		// Information
 		//pos, _ := fi.Seek(0, os.SEEK_END)
@@ -43,13 +45,15 @@ func Tail(path string, ch chan string, log bool) {
 			fmt.Fprintln(os.Stderr, "error scanning input: ", err)
 		}
 
-		fi.Close()
 		currentSize = getFileSize(path)
 	}
 }
 
-// TODO Error handling
 func getFileSize(path string) int64 {
-	info, _ := os.Stat(path)
+	info, err := os.Stat(path)
+	if err != nil {
+	  log.Fatal("Could not get size of log file.")  
+	}
+
 	return info.Size()
 }

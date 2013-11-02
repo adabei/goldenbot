@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"container/list"
 	"github.com/adabei/goldenbot/rcon"
+	"log"
 	"os"
 	"time"
 )
@@ -30,18 +31,21 @@ func (a *Advert) Start() {
 
 func (a *Advert) Advertise() {
 	l := list.New()
-	fi, _ := os.Open(a.input)
+	fi, err := os.Open(a.input)
+	defer fi.Close()
+
+	if err != nil {
+	  log.Println("Plugin advert failed to open adverts.")
+	}
+
 	scanner := bufio.NewScanner(fi)
 	for scanner.Scan() {
 		if val := scanner.Text(); len(val) == 0 {
 			l.PushBack(nil)
 		} else {
-
 			l.PushBack(val)
 		}
 	}
-
-	fi.Close()
 
 	for {
 		for e := l.Front(); e != nil; e = e.Next() {

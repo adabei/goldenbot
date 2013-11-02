@@ -3,15 +3,15 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/adabei/goldenbot/events"
+	"github.com/adabei/goldenbot/events/cod"
+	"github.com/adabei/goldenbot/greeter"
+	"github.com/adabei/goldenbot/rcon/cod"
+	"github.com/adabei/goldenbot/tails"
 	"io/ioutil"
 	"log"
-  _ "strings"
 	"os"
-	"github.com/adabei/goldenbot/rcon"
-	"github.com/adabei/goldenbot/tails"
-  "github.com/adabei/goldenbot/events"
-  "github.com/adabei/goldenbot/events/cod"
-	"github.com/adabei/goldenbot/greeter"
+	_ "strings"
 )
 
 type GoldenConfig struct {
@@ -25,37 +25,37 @@ func main() {
 	// Parse command line flags
 	configPath := *flag.String("config", "golden.cfg", "the config file to use")
 	flag.Parse()
-  cfg := LoadConfig(configPath)
+	cfg := LoadConfig(configPath)
 
-  // Initialize EventAggregator
-  ea := events.NewAggregator()
+	// Initialize EventAggregator
+	ea := events.NewAggregator()
 
 	// Setup RCON connection
 	rch := make(chan rcon.RCONRequest, 10)
 	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
 	go rcon.Relay()
 
-  // Plugins
+	// Plugins
 
-  greeter := greeter.NewGreeter("Welcome %s", rch, *ea)
-  go greeter.Start()
+	greeter := greeter.NewGreeter("Welcome %s", rch, *ea)
+	go greeter.Start()
 
 	logchan := make(chan string)
 	go tails.Tail(cfg.LogfilePath, logchan, false)
 	for {
 		line := <-logchan
-    join := cod.Join {"GUIDDD123", 1, line}
-    ea.Publish(join)
+		join := cod.Join{"GUIDDD123", 1, line}
+		ea.Publish(join)
 	}
 }
 
 func LoadConfig(path string) GoldenConfig {
-  // Read config
+	// Read config
 	fi, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Couldn't open config file: ", err)
 	}
-  defer fi.Close()
+	defer fi.Close()
 
 	b, err := ioutil.ReadAll(fi)
 	if err != nil {
@@ -64,7 +64,7 @@ func LoadConfig(path string) GoldenConfig {
 
 	var cfg GoldenConfig
 	json.Unmarshal(b, &cfg)
-  return cfg
+	return cfg
 }
 
 type Plugin interface {

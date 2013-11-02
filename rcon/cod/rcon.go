@@ -1,4 +1,4 @@
-package rcon
+package cod
 
 import (
 	"fmt"
@@ -33,6 +33,7 @@ func NewRCONRequest(command string, response chan string) *RCONRequest {
 	return rr
 }
 
+// TODO actual error handling
 func (r *RCON) Relay() {
 	for req := range r.incomming {
 		udpAddr, err := net.ResolveUDPAddr("udp", r.addr)
