@@ -29,7 +29,7 @@ func Parse(line string) interface{} {
 		ret.Target = values[11]
 		return ret
 	default:
-		return cod2.Parse(line)
+		return cod.Parse(line)
 	}
 }
 
