@@ -15,11 +15,11 @@ type RCON struct {
 	Queries chan RCONQuery
 }
 
-func NewRCON(addr, password string, incomming chan RCONRequest) *RCON {
+func NewRCON(addr, password string, queries chan RCONQuery) *RCON {
 	r := new(RCON)
 	r.addr = addr
 	r.password = password
-	r.incomming = incomming
+	r.Queries = queries
 	return r
 }
 

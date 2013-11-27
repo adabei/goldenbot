@@ -13,12 +13,20 @@ type RCON struct {
 	Queries  chan RCONQuery
 }
 
+func NewRCON(addr, password string, queries chan RCONQuery) *RCON {
+	r := new(RCON)
+	r.addr = addr
+	r.password = password
+	r.Queries = queries
+	return r
+}
+
 type RCONQuery struct {
 	Command  string
 	Response chan []byte
 }
 
-func Query(addr, cmd string) ([]byte, error) {
+func Query(addr string, cmd []byte) ([]byte, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, err
