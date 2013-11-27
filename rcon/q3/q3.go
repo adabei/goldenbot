@@ -3,6 +3,7 @@ package q3
 import (
 	"net"
 	"time"
+  "github.com/adabei/goldenbot/rcon"
 )
 
 const header = "\xff\xff\xff\xff"
@@ -10,20 +11,15 @@ const header = "\xff\xff\xff\xff"
 type RCON struct {
 	addr     string
 	password string
-	Queries  chan RCONQuery
+	Queries  chan rcon.RCONQuery
 }
 
-func NewRCON(addr, password string, queries chan RCONQuery) *RCON {
+func NewRCON(addr, password string, queries chan rcon.RCONQuery) *RCON {
 	r := new(RCON)
 	r.addr = addr
 	r.password = password
 	r.Queries = queries
 	return r
-}
-
-type RCONQuery struct {
-	Command  string
-	Response chan []byte
 }
 
 func Query(addr string, cmd []byte) ([]byte, error) {
