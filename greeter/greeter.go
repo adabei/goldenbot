@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/adabei/goldenbot/events"
 	"github.com/adabei/goldenbot/events/cod"
-	"github.com/adabei/goldenbot/rcon"
+	rcon "github.com/adabei/goldenbot/rcon/cod"
 )
 
 type Greeter struct {

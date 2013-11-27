@@ -1,13 +1,15 @@
 package main
 
 import (
+  "database/sql"
 	"encoding/json"
 	"flag"
 	"github.com/adabei/goldenbot/events"
 	"github.com/adabei/goldenbot/events/cod"
 	"github.com/adabei/goldenbot/greeter"
-	"github.com/adabei/goldenbot/rcon/cod"
+	rcon "github.com/adabei/goldenbot/rcon/cod"
 	"github.com/adabei/goldenbot/tails"
+  _ "github.com/mattn/go-sqlite3"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,7 +37,24 @@ func main() {
 	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
 	go rcon.Relay()
 
-	// Plugins
+	// Database
+  db, err := sql.Open("sqlite3", "./golden.sqlite3")
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  defer db.Close()
+
+  // If new??? setup???
+
+  query := "create table players(id text not null primary key);"
+  _, err = db.Exec(query)
+  if err != nil {
+    log.Printf("%q: %s\n", err, query)
+    return
+  }
+
+  // Plugins
 
 	greeter := greeter.NewGreeter("Welcome %s", rch, *ea)
 	go greeter.Start()
