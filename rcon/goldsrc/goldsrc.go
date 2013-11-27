@@ -1,10 +1,7 @@
 package goldsrc
 
 import (
-	"fmt"
-	"net"
-	"os"
-	"time"
+  "github.com/adabei/goldenbot/rcon/q3"
 )
 
 const header = "\xff\xff\xff\xff"
@@ -31,17 +28,18 @@ type RCONQuery struct {
 func (r *RCON) Relay(){
   for req := range r.Queries {
     // TODO get challenge from response
-    challenge, err := q3.Query(r.addr, challengePacket())[4:]
+    challenge, err := q3.Query(r.addr, challengePacket())
     if err != nil {
       continue
       // TODO log failure to receive challenge
     }
+    challenge = challenge[4:]
     
     res, err := q3.Query(r.addr, rconPacket(string(challenge), r.password, req.Command))
     if err != nil {
       // TODO log timeout
     } else {
-      req.Response <- res
+      req.Response <- string(res)
     }
   }
 }

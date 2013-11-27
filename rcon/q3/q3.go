@@ -44,7 +44,7 @@ func Query(addr string, cmd []byte) ([]byte, error) {
 	}
 
 	var buf [1024]byte
-	conn.SetReadDeadline(time.now().Add(5000 * time.Millisecond))
+	conn.SetReadDeadline(time.Now().Add(5000 * time.Millisecond))
 	n, err := conn.Read(buf[0:])
 	if err != nil {
 		return nil, err
