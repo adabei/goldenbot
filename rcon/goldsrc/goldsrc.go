@@ -1,49 +1,41 @@
 package goldsrc
 
 import (
-  "github.com/adabei/goldenbot/rcon"
-  "github.com/adabei/goldenbot/rcon/q3"
+	"github.com/adabei/goldenbot/rcon"
+	"github.com/adabei/goldenbot/rcon/q3"
+	"log"
 )
 
 const header = "\xff\xff\xff\xff"
 
-type RCON struct {
-	addr      string
-	password  string
-	Queries chan rcon.RCONQuery
+func init() {
+	rcon.Register("goldsrc", Relay)
 }
 
-func NewRCON(addr, password string, queries chan rcon.RCONQuery) *RCON {
-	r := new(RCON)
-	r.addr = addr
-	r.password = password
-	r.Queries = queries
-	return r
-}
+func Relay(addr, password string, queries chan rcon.RCONQuery) {
+	for req := range Queries {
+		// TODO get challenge from response
+		challenge, err := q3.Query(addr, challengePacket())
+		if err != nil {
+			continue
+			// TODO log failure to receive challenge
+		}
+		challenge = challenge[4:]
 
-func (r *RCON) Relay(){
-  for req := range r.Queries {
-    // TODO get challenge from response
-    challenge, err := q3.Query(r.addr, challengePacket())
-    if err != nil {
-      continue
-      // TODO log failure to receive challenge
-    }
-    challenge = challenge[4:]
-    
-    res, err := q3.Query(r.addr, rconPacket(string(challenge), r.password, req.Command))
-    if err != nil {
-      // TODO log timeout
-    } else {
-      req.Response <- string(res)
-    }
-  }
+		res, err := q3.Query(addr, rconPacket(string(challenge), password, req.Command))
+		if err != nil {
+			log.Println("RCON request timed out: ", req.Command)
+			req.Response <- nil
+		} else {
+			req.Response <- string(res)
+		}
+	}
 }
 
 func rconPacket(challenge, password, cmd string) []byte {
-	return []byte(header + "rcon "+ challenge + " \"" + password + "\" " + cmd)
+	return []byte(header + "rcon " + challenge + " \"" + password + "\" " + cmd)
 }
 
 func challengePacket() []byte {
-  return []byte(header + "challenge rcon\n\x00")
+	return []byte(header + "challenge rcon\n\x00")
 }

@@ -2,14 +2,14 @@ package main
 
 import (
   "database/sql"
+  _ "github.com/mattn/go-sqlite3"
 	"encoding/json"
 	"flag"
 	"github.com/adabei/goldenbot/events"
 	"github.com/adabei/goldenbot/events/cod"
-	"github.com/adabei/goldenbot/greeter"
-	rcon "github.com/adabei/goldenbot/rcon/cod"
+  "github.com/adabei/goldenbot/rcon"
+	_ "github.com/adabei/goldenbot/rcon/q3"
 	"github.com/adabei/goldenbot/tails"
-  _ "github.com/mattn/go-sqlite3"
 	"io/ioutil"
 	"log"
 	"os"
@@ -33,9 +33,8 @@ func main() {
 	ea := events.NewAggregator()
 
 	// Setup RCON connection
-	rch := make(chan rcon.RCONRequest, 10)
-	rcon := rcon.NewRCON(cfg.Address, cfg.RCONPassword, rch)
-	go rcon.Relay()
+	rch := make(chan rcon.RCONQuery, 10)
+	go rcon.Relay("q3", cfg.Address, cfg.RCONPassword, rch)
 
 	// Database
   db, err := sql.Open("sqlite3", "./golden.sqlite3")
@@ -53,11 +52,6 @@ func main() {
     log.Printf("%q: %s\n", err, query)
     return
   }
-
-  // Plugins
-
-	greeter := greeter.NewGreeter("Welcome %s", rch, *ea)
-	go greeter.Start()
 
 	logchan := make(chan string)
 	go tails.Tail(cfg.LogfilePath, logchan, false)

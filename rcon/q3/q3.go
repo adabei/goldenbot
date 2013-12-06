@@ -1,26 +1,17 @@
 package q3
 
 import (
+	"github.com/adabei/goldenbot/rcon"
+	"log"
 	"net"
 	"time"
-  "github.com/adabei/goldenbot/rcon"
 )
 
+func init() {
+	rcon.Register("q3", Relay)
+}
+
 const header = "\xff\xff\xff\xff"
-
-type RCON struct {
-	addr     string
-	password string
-	Queries  chan rcon.RCONQuery
-}
-
-func NewRCON(addr, password string, queries chan rcon.RCONQuery) *RCON {
-	r := new(RCON)
-	r.addr = addr
-	r.password = password
-	r.Queries = queries
-	return r
-}
 
 func Query(addr string, cmd []byte) ([]byte, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
@@ -49,11 +40,12 @@ func Query(addr string, cmd []byte) ([]byte, error) {
 	return buf[0:n], nil
 }
 
-func (r *RCON) Relay() {
-	for req := range r.Queries {
-		res, err := Query(r.addr, rconPacket(r.password, req.Command))
+func Relay(addr, password string, queries chan rcon.RCONQuery) {
+	for req := range queries {
+		res, err := Query(addr, rconPacket(password, req.Command))
 		if err != nil {
-			//log timeout
+			log.Println("RCON request timed out: ", req.Command)
+			req.Response <- nil
 		} else {
 			req.Response <- res
 		}
