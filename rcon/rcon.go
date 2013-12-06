@@ -10,7 +10,7 @@ type RCONQuery struct {
 	Response chan []byte
 }
 
-var protocols map[string]func(string, string, chan RCONQuery) 
+var protocols = make(map[string]func(string, string, chan RCONQuery))
 
 func Register(name string, protocol func(string, string, chan RCONQuery)) {
 	if _, dup := protocols[name]; dup {
