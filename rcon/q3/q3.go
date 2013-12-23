@@ -49,6 +49,9 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 		} else {
 			req.Response <- res
 		}
+
+    // only two RCON commands per second (server only accepts two)
+    time.Sleep(500 * time.Millisecond)
 	}
 }
 
