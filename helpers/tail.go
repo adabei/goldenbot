@@ -1,5 +1,4 @@
-// Package tails offers an implementation of tail in Go
-package tails
+package helpers
 
 import (
 	"bufio"
@@ -52,7 +51,7 @@ func Tail(path string, ch chan string, log bool) {
 func getFileSize(path string) int64 {
 	info, err := os.Stat(path)
 	if err != nil {
-	  log.Fatal("Could not get size of log file.")  
+		log.Fatal("Could not get size of log file.")
 	}
 
 	return info.Size()
