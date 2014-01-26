@@ -1,9 +1,9 @@
 package cod
 
 import (
+	"log"
 	"strconv"
 	"strings"
-	"log"
 )
 
 func Parse(line string) interface{} {
@@ -119,12 +119,16 @@ func Parse(line string) interface{} {
 }
 
 type InitGame struct {
+	Unix int64
+	Vars map[string]string
 }
 
 type ExitLevel struct {
+	Unix int64
 }
 
 type ShutdownGame struct {
+	Unix int64
 }
 
 type Weapon struct {
