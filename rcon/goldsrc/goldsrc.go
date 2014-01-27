@@ -1,3 +1,6 @@
+// Package goldsrc implements the GoldSrc RCON protocol.
+// This implementation can be used for Counter Strike 1.6.
+// It relies on package q3 for DRY-ness.
 package goldsrc
 
 import (
@@ -12,6 +15,9 @@ func init() {
 	rcon.Register("goldsrc", Relay)
 }
 
+// Relay allows for easier use in concurrent system.
+// By calling Relay in a goroutine and passing requests using
+// the queries channel the password does not need to be exposed.
 func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	for req := range Queries {
 		// TODO get challenge from response
@@ -32,10 +38,13 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	}
 }
 
+// rconPacket generates a GoldSrc compatible packet.
 func rconPacket(challenge, password, cmd string) []byte {
 	return []byte(header + "rcon " + challenge + " \"" + password + "\" " + cmd)
 }
 
+// challengePacket generates a GoldSrc compatible challenge packet.
+// Challenge packets are used to receive a challenge nonce.
 func challengePacket() []byte {
 	return []byte(header + "challenge rcon\n\x00")
 }

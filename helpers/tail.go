@@ -48,6 +48,7 @@ func Tail(path string, ch chan string, log bool) {
 	}
 }
 
+// getFileSize calculates the file size of a given file.
 func getFileSize(path string) int64 {
 	info, err := os.Stat(path)
 	if err != nil {

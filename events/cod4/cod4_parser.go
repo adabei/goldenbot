@@ -1,3 +1,5 @@
+// Package cod4 is an extension to package cod.
+// It differs by defining a specific type for COD4's changed Kill event.
 package cod4
 
 import (

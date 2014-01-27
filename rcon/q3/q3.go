@@ -1,3 +1,5 @@
+// Package q3 implements the Quake 3 RCON protocol.
+// This implementation can also be used for COD, COD2 and COD4.
 package q3
 
 import (
@@ -13,6 +15,8 @@ func init() {
 
 const header = "\xff\xff\xff\xff"
 
+// Query sends a single RCON command cmd to the server at addr.
+// It returns the server response and any error encountered.
 func Query(addr string, cmd []byte) ([]byte, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
@@ -40,6 +44,9 @@ func Query(addr string, cmd []byte) ([]byte, error) {
 	return buf[0:n], nil
 }
 
+// Relay allows for easier use in concurrent system.
+// By calling Relay in a goroutine and passing requests using
+// the queries channel the password does not need to be exposed.
 func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	for req := range queries {
 		res, err := Query(addr, rconPacket(password, req.Command))
@@ -55,6 +62,7 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	}
 }
 
+// rconPacket generates a Q3 compatible packet.
 func rconPacket(password, cmd string) []byte {
 	return []byte(header + "rcon \"" + password + "\" " + cmd)
 }

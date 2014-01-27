@@ -1,3 +1,6 @@
+// Package source implements the Source RCON protocol.
+// This implementation can be used for games using the Source engine,
+// most notably Valve games.
 package source
 
 //TODO multi-packet responses
@@ -24,6 +27,8 @@ func init() {
 	rcon.Register("source", Relay)
 }
 
+// Query sends a single RCON command cmd using the connection conn.
+// It returns the server response and any error encountered.
 func Query(conn net.Conn, packet []byte) ([]byte, error) {
 	_, err := conn.Write(packet)
 	if err != nil {
@@ -40,6 +45,9 @@ func Query(conn net.Conn, packet []byte) ([]byte, error) {
 	return buf[12:n], nil
 }
 
+// Relay allows for easier use in concurrent system.
+// By calling Relay in a goroutine and passing requests using
+// the queries channel the password does not need to be exposed.
 func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	conn, err := authorizeConnection(addr, password)
 	if err != nil {
@@ -60,6 +68,8 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	}
 }
 
+// authorizeConnection establishes the RCON connection to the server addr
+// using password for authorization.
 func authorizeConnection(addr, password string) (net.Conn, error) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -93,6 +103,7 @@ func authorizeConnection(addr, password string) (net.Conn, error) {
 	return conn, nil
 }
 
+// rconPacket generates a Source compatible packet.
 func rconPacket(id, packetType int, body string) []byte {
 	buf := make([]byte, 0)
 	buf = append(buf, littleEndianInt32(len(body)+10)...)
@@ -104,6 +115,7 @@ func rconPacket(id, packetType int, body string) []byte {
 	return buf
 }
 
+// littleEndianInt32 converts a 32 bit integer value to []byte.
 func littleEndianInt32(n int) []byte {
 	buf := &bytes.Buffer{}
 	binary.Write(buf, binary.LittleEndian, int32(n))

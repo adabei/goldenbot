@@ -1,3 +1,5 @@
+// Package cod can be used to parse server log lines generated
+// by COD, COD2 and COD4. Note that COD4 differs slightly.
 package cod
 
 import (
@@ -6,9 +8,9 @@ import (
 	"strings"
 )
 
+// Parse parses a log line and returns a matching event struct.
+// In the case that a line doesn't match anything nil is returned.
 func Parse(line string) interface{} {
-
-	//todo global, todo more
 	indices := map[string]int{"say": 4, "sayteam": 4, "tell": 7}
 
 	offset := 0
