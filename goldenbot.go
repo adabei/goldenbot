@@ -1,9 +1,4 @@
-package main
-
-import (
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
-)
+package goldenbot
 
 type Plugin interface {
 	Setup() error
@@ -12,7 +7,7 @@ type Plugin interface {
 
 // Setup is a tiny helper to run database setups for the specified plugins
 func Setup(plugins ...Plugin) error {
-	for p := range plugins {
+	for _, p := range plugins {
 		err := p.Setup()
 		if err != nil {
 			return err
