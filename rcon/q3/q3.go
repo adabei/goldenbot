@@ -51,14 +51,15 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	for req := range queries {
 		res, err := Query(addr, rconPacket(password, req.Command))
 		if err != nil {
-			log.Println("RCON request timed out: ", req.Command)
-			req.Response <- nil
-		} else {
+			log.Println("RCON request timed out:", req.Command)
+		}
+
+		if req.Response != nil {
 			req.Response <- res
 		}
 
-    // only two RCON commands per second (server only accepts two)
-    time.Sleep(500 * time.Millisecond)
+		// only two RCON commands per second (server only accepts two)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 

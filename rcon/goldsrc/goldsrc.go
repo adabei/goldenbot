@@ -29,10 +29,12 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 		challenge = challenge[4:]
 
 		res, err := q3.Query(addr, rconPacket(string(challenge), password, req.Command))
+
 		if err != nil {
-			log.Println("RCON request timed out: ", req.Command)
-			req.Response <- nil
-		} else {
+			log.Println("RCON request timed out:", req.Command)
+		}
+
+		if req.Response != nil {
 			req.Response <- res
 		}
 	}

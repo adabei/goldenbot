@@ -57,11 +57,11 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 	for req := range queries {
 		res, err := Query(conn, rconPacket(1337, SERVERDATA_EXECCOMMAND, req.Command))
 		if err != nil {
-			log.Println("RCON request failed: ", req.Command)
-			req.Response <- nil
-		} else {
+			log.Println("RCON request failed:", req.Command)
+		}
+
+		if req.Response != nil {
 			req.Response <- res
-			fmt.Println(res)
 		}
 
 		time.Sleep(500 * time.Millisecond)
