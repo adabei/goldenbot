@@ -19,7 +19,7 @@ func init() {
 // By calling Relay in a goroutine and passing requests using
 // the queries channel the password does not need to be exposed.
 func Relay(addr, password string, queries chan rcon.RCONQuery) {
-	for req := range Queries {
+	for req := range queries {
 		// TODO get challenge from response
 		challenge, err := q3.Query(addr, challengePacket())
 		if err != nil {
@@ -33,7 +33,7 @@ func Relay(addr, password string, queries chan rcon.RCONQuery) {
 			log.Println("RCON request timed out: ", req.Command)
 			req.Response <- nil
 		} else {
-			req.Response <- string(res)
+			req.Response <- res
 		}
 	}
 }
