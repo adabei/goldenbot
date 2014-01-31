@@ -8,14 +8,8 @@ import (
 )
 
 func Parse(line string) interface{} {
-	offset := 0
-	if line[:1] == " " {
-		offset = strings.Index(line[1:], " ") + 2
-	} else {
-		offset = strings.Index(line, " ") + 1
-	}
-
-	values := strings.Split(line[offset:], ";")
+  cleanLine = strings.TrimSpace(line)
+  values := strings.Split(cleanLine[strings.Index(cleanLine, " ")+1:], ";")
 
 	switch values[0] {
 	case "K":
