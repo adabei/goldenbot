@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"github.com/adabei/goldenbot/rcon"
 	"log"
 	"net"
