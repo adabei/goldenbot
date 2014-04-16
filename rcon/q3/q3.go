@@ -3,7 +3,7 @@
 package q3
 
 import (
-	"github.com/adabei/goldenbot/rcon"
+	"github.com/schwarz/goldenbot/rcon"
 	"log"
 	"net"
 	"time"

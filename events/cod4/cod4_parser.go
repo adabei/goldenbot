@@ -3,7 +3,7 @@
 package cod4
 
 import (
-	"github.com/adabei/goldenbot/events/cod"
+	"github.com/schwarz/goldenbot/events/cod"
 	"strings"
 )
 

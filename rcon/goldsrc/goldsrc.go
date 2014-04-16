@@ -4,8 +4,8 @@
 package goldsrc
 
 import (
-	"github.com/adabei/goldenbot/rcon"
-	"github.com/adabei/goldenbot/rcon/q3"
+	"github.com/schwarz/goldenbot/rcon"
+	"github.com/schwarz/goldenbot/rcon/q3"
 	"log"
 )
 

@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"github.com/adabei/goldenbot/rcon"
+	"github.com/schwarz/goldenbot/rcon"
 	"log"
 	"net"
 	"time"
